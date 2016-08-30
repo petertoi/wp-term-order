@@ -1,12 +1,11 @@
 === WP Term Order ===
-Contributors: johnjamesjacoby, stuttter
+Contributors: johnjamesjacoby, stuttter, petertoi
 Tags: taxonomy, term, order
-Requires at least: 4.3
+Requires at least: 4.5
 Tested up to: 4.4
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9Q4F4EL5YJ62J
 
 == Description ==
 
@@ -48,7 +47,7 @@ No. There are no new database tables with this plugin.
 
 = Does this modify existing database tables? =
 
-Yes. The `wp_term_taxonomy` table is altered, and an `order` column is added.
+No! This fork uses Term Meta to save the term order.
 
 = Where can I get support? =
 
@@ -59,6 +58,9 @@ The WordPress support forums: https://wordpress.org/support/plugin/wp-term-order
 http://github.com/stuttter/wp-term-order/
 
 == Changelog ==
+
+= 0.1.5 =
+* Modified to use term meta instead of altering core tables
 
 = 0.1.4 =
 * Fix order saving in non-fancy mode
