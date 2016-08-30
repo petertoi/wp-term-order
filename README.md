@@ -22,32 +22,20 @@ No. There are no new database tables with this plugin.
 
 ### Does this modify existing database tables?
 
-Yes. The `wp_term_taxonomy` table is altered, and an `order` column is added.
+No! This fork uses Term Meta to save the term order.
 
 ### Can I query and sort by `order`?
 
 Yes. Use it like:
 
 ```
-$terms = get_terms( 'category', array(
+$terms = get_terms( array(
+    'taxonomy'   => 'category',
 	'depth'      => 1,
 	'number'     => 100,
 	'parent'     => 0,
 	'orderby'    => 'order', // <--- Looky looky!
 	'order'      => 'ASC',
 	'hide_empty' => false,
-
-	// Try the "wp-term-meta" plugin!
-	'meta_query' => array( array(
-		'key' => 'term_thumbnail'
-	) )
 ) );
 ```
-
-### Where can I get support?
-
-The WordPress support forums: https://wordpress.org/support/plugin/wp-term-order/
-
-### Can I contribute?
-
-Yes, please! The number of users needing more robust taxonomy term ordering is growing fast. Having an easy-to-use UI and powerful set of functions is critical to managing complex WordPress installations. If this is your thing, please help us out!
