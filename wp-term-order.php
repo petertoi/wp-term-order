@@ -2,11 +2,11 @@
 
 /**
  * Plugin Name: WP Term Order
- * Plugin URI:  https://wordpress.org/plugins/wp-term-order/
- * Author:      John James Jacoby
- * Author URI:  https://jjj.me/
- * Version:     0.1.4
- * Description: Sort taxonomy terms, your way
+ * Plugin URI:  https://github.com/petertoi/wp-term-order
+ * Author:      Peter Toi
+ * Author URI:  http://petertoi.com/
+ * Version:     0.1.5
+ * Description: Sort taxonomy terms, your way. Fork of JJJ's plugin. Does not alter the database. Uses term meta instead.
  * License:     GPL v2 or later
  */
 
@@ -26,12 +26,12 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		/**
 		 * @var string Plugin version
 		 */
-		public $version = '0.1.4';
+		public $version = '0.1.5';
 
 		/**
 		 * @var string Database version
 		 */
-		public $db_version = 201510280002;
+		public $db_version = 201608301840;
 
 		/**
 		 * @var string Database version
@@ -131,6 +131,7 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 
 			// Check for DB update
 			//$this->maybe_upgrade_database();
+			//$this->add_default_term_order();
 		}
 
 		/**
@@ -555,6 +556,14 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 				return $pieces;
 			}
 
+			// Compare # of terms with term_order against # of terms without. Don't override if they don't match.
+			$all_terms     = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} as tt WHERE tt.taxonomy = '{$taxonomies[0]}'" );
+			$ordered_terms = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} as tt LEFT JOIN {$wpdb->termmeta} as tm ON tt.term_id = tm.term_id WHERE tt.taxonomy = '{$taxonomies[0]}' AND tm.meta_key = 'term_order_{$taxonomies[0]}'" );
+
+			if ( $all_terms !== $ordered_terms ) {
+				return $pieces;
+			}
+
 			// Maybe force `orderby`
 			if ( empty( $args['orderby'] ) || ( 'order' === $args['orderby'] ) ) {
 				$pieces['fields'] .= ', term_meta.*';
@@ -626,6 +635,8 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		 */
 		public static function ajax_reordering_terms() {
 
+			global $wpdb;
+
 			// Bail if required term data is missing
 			if ( empty( $_POST['id'] ) || empty( $_POST['tax'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) ) {
 				die( - 1 );
@@ -692,24 +703,31 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 				$nextid = false;
 			}
 
+			$all_terms     = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} as tt WHERE tt.taxonomy = '{$taxonomy}'" );
+			$ordered_terms = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->term_taxonomy} as tt LEFT JOIN {$wpdb->termmeta} as tm ON tt.term_id = tm.term_id WHERE tt.taxonomy = '{$taxonomy}' AND tm.meta_key = 'term_order_{$taxonomies[0]}'" );
+
 			// Get term siblings for relative ordering
-			$siblings = get_terms( array(
+			$sibling_args = array(
 				'taxonomy'   => $taxonomy,
 				'depth'      => 1,
 				'number'     => 100,
 				'parent'     => $parent_id,
-				'orderby'    => 'meta_value_num',
-				'order'      => 'ASC',
-				'meta_key'   => "term_order_{$taxonomy}",
 				'hide_empty' => false,
 				'exclude'    => $excluded,
-				'meta_query' => array(
+			);
+			if ( $all_terms === $ordered_terms ) {
+				$sibling_args['orderby']    = 'meta_value_num';
+				$sibling_args['order']      = 'ASC';
+				$sibling_args['meta_key']   = "term_order_{$taxonomy}";
+				$sibling_args['meta_query'] = array(
 					array(
 						'key'     => "term_order_{$taxonomy}",
 						'compare' => 'EXISTS',
 					)
-				),
-			) );
+				);
+			}
+			$siblings = get_terms( $sibling_args );
+
 
 			// Loop through siblings and update terms
 			foreach ( $siblings as $sibling ) {
