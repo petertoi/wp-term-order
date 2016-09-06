@@ -34,11 +34,6 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		public $db_version = 201608301840;
 
 		/**
-		 * @var string Database version
-		 */
-		public $db_version_key = 'wpdb_term_taxonomy_version';
-
-		/**
 		 * @var string File for plugin
 		 */
 		public $file = '';
