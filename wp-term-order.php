@@ -526,12 +526,12 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 				$pieces['fields'] .= ', term_meta.*';
 				$pieces['join'] .= "\nINNER JOIN {$wpdb->termmeta} as term_meta ON t.term_id = term_meta.term_id";
 				$pieces['where'] .= "\nAND term_meta.meta_key = 'term_order_{$taxonomies[0]}'";
-				$pieces['orderby'] = "ORDER BY ABS(term_meta.meta_value)";
+				$pieces['orderby'] = "ORDER BY term_meta.meta_value";
 			} elseif ( stristr( $pieces['orderby'], 't.name' ) ) {
 				$pieces['fields'] .= ', term_meta.*';
 				$pieces['join'] .= "\nINNER JOIN {$wpdb->termmeta} as term_meta ON t.term_id = term_meta.term_id";
 				$pieces['where'] .= "\nAND term_meta.meta_key = 'term_order_{$taxonomies[0]}'";
-				$pieces['orderby'] = "ORDER BY ABS(term_meta.meta_value) ASC, t.name";
+				$pieces['orderby'] = "ORDER BY term_meta.meta_value ASC, t.name";
 			}
 
 			// Return possibly modified `orderby` value
