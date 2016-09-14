@@ -29,11 +29,6 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		public $version = '0.2.0';
 
 		/**
-		 * @var string Database version
-		 */
-		public $db_version = 201608301840;
-
-		/**
 		 * @var string File for plugin
 		 */
 		public $file = '';
