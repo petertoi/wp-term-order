@@ -3,7 +3,7 @@ Contributors: johnjamesjacoby, stuttter, petertoi
 Tags: taxonomy, term, order
 Requires at least: 4.5
 Tested up to: 4.4
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
