@@ -5,7 +5,7 @@
  * Plugin URI:  https://github.com/petertoi/wp-term-order
  * Author:      Peter Toi
  * Author URI:  http://petertoi.com/
- * Version:     0.1.5
+ * Version:     0.2.0
  * Description: Sort taxonomy terms, your way. Fork of JJJ's plugin. Does not alter the database. Uses term meta instead.
  * License:     GPL v2 or later
  */
@@ -26,17 +26,12 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		/**
 		 * @var string Plugin version
 		 */
-		public $version = '0.1.5';
+		public $version = '0.2.0';
 
 		/**
 		 * @var string Database version
 		 */
 		public $db_version = 201608301840;
-
-		/**
-		 * @var string Database version
-		 */
-		public $db_version_key = 'wpdb_term_taxonomy_version';
 
 		/**
 		 * @var string File for plugin
@@ -129,9 +124,6 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		 */
 		public function admin_init() {
 
-			// Check for DB update
-			//$this->maybe_upgrade_database();
-			//$this->add_default_term_order();
 		}
 
 		/**
@@ -306,7 +298,6 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		 * @return mixed
 		 */
 		public function add_column_value( $empty = '', $custom_column = '', $term_id = 0 ) {
-
 			// Bail if no taxonomy passed or not on the `order` column
 			if ( empty( $_REQUEST['taxonomy'] ) || ( 'order' !== $custom_column ) || ! empty( $empty ) ) {
 				return;
@@ -362,28 +353,12 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		 *
 		 * @since 0.1.0
 		 *
-		 * @global object $wpdb
-		 *
 		 * @param  int $term_id
 		 * @param  string $taxonomy
 		 * @param  int $order
 		 * @param  bool $clean_cache
 		 */
 		public static function set_term_order( $term_id = 0, $taxonomy = '', $order = 0, $clean_cache = false ) {
-			//global $wpdb;
-
-			// Update the database row
-//		$wpdb->update(
-//			$wpdb->term_taxonomy,
-//			array(
-//				'order' => $order
-//			),
-//			array(
-//				'term_id'  => $term_id,
-//				'taxonomy' => $taxonomy
-//			)
-//		);
-
 			update_term_meta( $term_id, "term_order_$taxonomy", $order );
 
 			// Maybe clean the term cache
@@ -401,32 +376,9 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		 */
 		public function get_term_order( $term_id = 0 ) {
 
-			$order = get_term_meta( $term_id, "term_order_{$_REQUEST['taxonomy']}" );
+			$order = get_term_meta( $term_id, "term_order_{$_REQUEST['taxonomy']}", true );
 
 			return ( ! empty( $order ) ) ? (int) $order : 0;
-
-			// Use term order if set
-//		if ( isset( $term->order ) ) {
-//			$retval = $term->order;
-//		}
-
-//		// Check for option order
-//		if ( empty( $retval ) ) {
-//			$key    = "term_order_{$term->taxonomy}";
-//			$orders = get_option( $key, array() );
-//
-//			if ( ! empty( $orders ) ) {
-//				foreach ( $orders as $position => $value ) {
-//					if ( $value === $term->term_id ) {
-//						$retval = $position;
-//						break;
-//					}
-//				}
-//			}
-//		}
-//
-//		// Cast & return
-//		return (int) $retval;
 		}
 
 		/** Markup ****************************************************************/
@@ -569,59 +521,16 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 				$pieces['fields'] .= ', term_meta.*';
 				$pieces['join'] .= "\nINNER JOIN {$wpdb->termmeta} as term_meta ON t.term_id = term_meta.term_id";
 				$pieces['where'] .= "\nAND term_meta.meta_key = 'term_order_{$taxonomies[0]}'";
-				$pieces['orderby'] = "ORDER BY ABS(term_meta.meta_value)";
+				$pieces['orderby'] = "ORDER BY term_meta.meta_value";
 			} elseif ( stristr( $pieces['orderby'], 't.name' ) ) {
 				$pieces['fields'] .= ', term_meta.*';
 				$pieces['join'] .= "\nINNER JOIN {$wpdb->termmeta} as term_meta ON t.term_id = term_meta.term_id";
 				$pieces['where'] .= "\nAND term_meta.meta_key = 'term_order_{$taxonomies[0]}'";
-				$pieces['orderby'] = "ORDER BY ABS(term_meta.meta_value) ASC, t.name";
+				$pieces['orderby'] = "ORDER BY term_meta.meta_value ASC, t.name";
 			}
 
 			// Return possibly modified `orderby` value
 			return $pieces;
-		}
-
-		/** Database Alters *******************************************************/
-
-		/**
-		 * Should a database update occur
-		 *
-		 * @since 0.1.0
-		 *
-		 * Runs on `init`
-		 */
-		private function maybe_upgrade_database() {
-
-			// Check DB for version
-			$db_version = get_option( $this->db_version_key );
-
-			// Needs
-			if ( $db_version < $this->db_version ) {
-				$this->upgrade_database( $db_version );
-			}
-		}
-
-		/**
-		 * Modify the `term_taxonomy` table and add an `order` column to it
-		 *
-		 * @since 0.1.0
-		 *
-		 * @param  int $old_version
-		 *
-		 * @global object $wpdb
-		 */
-		private function upgrade_database( $old_version = 0 ) {
-			global $wpdb;
-
-			$old_version = (int) $old_version;
-
-			// The main column alter
-			if ( $old_version < 201508110005 ) {
-				$wpdb->query( "ALTER TABLE `{$wpdb->term_taxonomy}` ADD `order` INT (11) NOT NULL DEFAULT 0;" );
-			}
-
-			// Update the DB version
-			update_option( $this->db_version_key, $this->db_version );
 		}
 
 		/** Admin Ajax ************************************************************/
