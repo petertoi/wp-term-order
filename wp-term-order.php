@@ -5,7 +5,7 @@
  * Plugin URI:  https://github.com/petertoi/wp-term-order
  * Author:      Peter Toi
  * Author URI:  http://petertoi.com/
- * Version:     0.2.0
+ * Version:     0.2.1
  * Description: Sort taxonomy terms, your way. Fork of JJJ's plugin. Does not alter the database. Uses term meta instead.
  * License:     GPL v2 or later
  */
@@ -26,7 +26,7 @@ if ( ! class_exists( 'WP_Term_Order' ) ) :
 		/**
 		 * @var string Plugin version
 		 */
-		public $version = '0.2.0';
+		public $version = '0.2.1';
 
 		/**
 		 * @var string File for plugin
